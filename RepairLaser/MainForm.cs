@@ -182,313 +182,19 @@ namespace RepairLaser
             if (stopFlag)
                 return;
 
-            //去一级视觉
-
-            PTPPrm[] movePrm_photo = new PTPPrm[2];
-            movePrm_photo[0].iCoorAxis = 0;
-            movePrm_photo[0].dPos = m_prm.PhotoPos_x;
-
-            movePrm_photo[1].iCoorAxis = 1;
-            movePrm_photo[1].dPos = m_prm.PhotoPos_y;
-
-            moWin.m_motion.Motion_PToPMove(movePrm_photo);
+            //去拍照位置
+            goto_photoPos();
+        
 
             if (stopFlag)
                 return;
 
-
-
-            //一级视觉处理，得到一系列坐标
-            double[] vision_1_x;
-            double[] vision_1_y;
-            int vision_1_num;
-            cogWin.Job1_Run(out vision_1_x, out vision_1_y, out vision_1_num);
+            visionPro_1();
 
             if (stopFlag)
                 return;
-            if(vision_1_num <= 0)
-            {
-                Console.WriteLine("not found");
-                workStopped();
-                return;
-            }
-
-            //int i = 0;
-            //STEPPrm[] movePrm_vision2 = new STEPPrm[2];
-            //STEPPrm prm_2_x, prm_2_y;
-            //prm_2_x.iCoorAxis = 0;
-            //prm_2_x.dStepPos = -1 * vision_1_x[i];
-            //prm_2_y.iCoorAxis = 1;
-            //prm_2_y.dStepPos = -1 * vision_1_y[i];
-
-            //movePrm_vision2[0] = prm_2_x;
-            //movePrm_vision2[1] = prm_2_y;
-
-            //Console.WriteLine(prm_2_x.dStepPos);
-            //Console.WriteLine(prm_2_y.dStepPos);
-
-            //moWin.m_motion.Motion_StepMove(movePrm_vision2);
 
             
-
-            //int i = 0;
-            //PTPPrm[] movePrm_2 = new PTPPrm[2];
-            //PTPPrm prm_2_x;
-            //    prm_2_x.iCoorAxis = 0;
-            //    prm_2_x.dPos = (-1) * vision_1_x[i];
-            //    PTPPrm prm_2_y;
-            //    prm_2_y.iCoorAxis = 1;
-            //    prm_2_y.dPos = (-1) * vision_1_y[i];
-            //    movePrm_2[0] = prm_2_x;
-            //    movePrm_2[1] = prm_2_y;    
-
-            //    moWin.m_motion.Motion_PToPMove(movePrm_2);
-
-            //注意，这里在相对运动时出现未考虑到的情况，即后面点的初始位置已经变化。改用点位运动。
-            double cPos_1_x, cPos_1_y;
-            moWin.m_motion.Motion_GetRealTimePosAxis(0, out cPos_1_x);
-            moWin.m_motion.Motion_GetRealTimePosAxis(1, out cPos_1_y);
-
-            
-            for (int i = 0; i < vision_1_num;i++ )
-            {
-                //去二级视觉
-                //STEPPrm[] movePrm_2 = new STEPPrm[2];
-                //STEPPrm prm_2_x;
-                //prm_2_x.iCoorAxis = 0;
-                //prm_2_x.dStepPos = -1 * vision_1_x[i];
-                //STEPPrm prm_2_y;
-                //prm_2_y.iCoorAxis = 1;
-                //prm_2_y.dStepPos = -1 * vision_1_y[i];
-                //movePrm_2[0] = prm_2_x;
-                //movePrm_2[1] = prm_2_y;
-
-                //moWin.m_motion.Motion_StepMove(movePrm_2);
-
-
-                //后期优化中可以将X,Y,Z轴的运动一起进行，暂时是分开的，一个是step，一个是ptp
-                PTPPrm[] movePrm_2 = new PTPPrm[3];
-
-                PTPPrm prm_2_x;
-                prm_2_x.iCoorAxis = 0;
-                prm_2_x.dPos = cPos_1_x - vision_1_x[i];
-
-                PTPPrm prm_2_y;
-                prm_2_y.iCoorAxis = 1;
-                prm_2_y.dPos = cPos_1_y - vision_1_y[i];
-
-
-                PTPPrm prm_2_z;
-                prm_2_z.iCoorAxis = 2;
-                prm_2_z.dPos = m_prm.FocusPos_z_2;
-
-                movePrm_2[0] = prm_2_x;
-                movePrm_2[1] = prm_2_y;
-                movePrm_2[2] = prm_2_z;
-                moWin.m_motion.Motion_PToPMove(movePrm_2);
-
-
-                //PTPPrm[] movePrm_2 = new PTPPrm[2];
-                //PTPPrm prm_2_x;
-                //prm_2_x.iCoorAxis = 0;
-                //prm_2_x.dPos = vision_1_x[i];
-                //PTPPrm prm_2_y;
-                //prm_2_y.iCoorAxis = 1;
-                //prm_2_y.dPos = vision_1_y[i];
-                //movePrm_2[0] = prm_2_x;
-                //movePrm_2[1] = prm_2_y;
-
-                //moWin.m_motion.Motion_PToPMove(movePrm_2);
-
-                if (stopFlag)
-                    return;
-
-                //物镜切换、自动对焦
-                if (stopFlag)
-                    return;
-
-                //二级视觉处理，得到若干坐标
-                double[] vision_2_x;
-                double[] vision_2_y;
-                int vision_2_num;
-                cogWin.Job2_Run(out vision_2_x, out vision_2_y, out vision_2_num);
-
-                if (stopFlag)
-                    return;
-
-                double cPos_2_x, cPos_2_y;
-                moWin.m_motion.Motion_GetRealTimePosAxis(0, out cPos_2_x);
-                moWin.m_motion.Motion_GetRealTimePosAxis(1, out cPos_2_y);
-
-
-
-         
-                for(int j=0;j<vision_2_num;j++)
-                {
-                    PTPPrm[] movePrm_3 = new PTPPrm[3];
-
-                    PTPPrm prm_3_x;
-                    prm_3_x.iCoorAxis = 0;
-                    prm_3_x.dPos = cPos_2_x - vision_2_x[j];
-
-                    PTPPrm prm_3_y;
-                    prm_3_y.iCoorAxis = 1;
-                    prm_3_y.dPos = cPos_2_y - vision_2_y[j];
-
-
-                    PTPPrm prm_3_z;
-                    prm_3_z.iCoorAxis = 2;
-                    prm_3_z.dPos = m_prm.FocusPos_z;
-
-                    //测试用，写死第二个点的焦距，后面应该删除
-                    if(i==1)
-                    {
-                        prm_3_z.dPos = -6.4448;
-                    }
-
-                    //以上
-
-                    movePrm_3[0] = prm_3_x;
-                    movePrm_3[1] = prm_3_y;
-                    movePrm_3[2] = prm_3_z;
-                    moWin.m_motion.Motion_PToPMove(movePrm_3);
-
-
-
-                    //去三级视觉                
-                    //STEPPrm[] movePrm_3 = new STEPPrm[2];
-                    //STEPPrm prm_3_x;
-                    //prm_3_x.iCoorAxis = 0;
-                    //prm_3_x.dStepPos = -1 * vision_2_x[j];
-                    //STEPPrm prm_3_y;
-                    //prm_3_y.iCoorAxis = 1;
-                    //prm_3_y.dStepPos = -1 * vision_2_y[j];
-                    //movePrm_3[0] = prm_3_x;
-                    //movePrm_3[1] = prm_3_y;
-
-                    //moWin.m_motion.Motion_StepMove(movePrm_3);
-
-
-
-                    //PTPPrm[] movePrm_3_z = new PTPPrm[1];
-                    //PTPPrm prm_3_z;
-                    //prm_3_z.iCoorAxis = 2;
-                    //prm_3_z.dPos = m_prm.FocusPos_z;
-                    //movePrm_3_z[0] = prm_3_z;
-                    //moWin.m_motion.Motion_PToPMove(movePrm_3_z);
-
-
-                    //PTPPrm[] movePrm_3 = new PTPPrm[2];
-                    //PTPPrm prm_3_x;
-                    //prm_3_x.iCoorAxis = 0;
-                    //prm_3_x.dPos = vision_1_x[i];
-                    //PTPPrm prm_3_y;
-                    //prm_3_y.iCoorAxis = 1;
-                    //prm_3_y.dPos = vision_1_y[i];
-                    //movePrm_3[0] = prm_3_x;
-                    //movePrm_3[1] = prm_3_y;
-
-                    //moWin.m_motion.Motion_PToPMove(movePrm_3);
-
-                    if (stopFlag)
-                        return;
-
-                    //物镜切换、自动对焦
-                    if (stopFlag)
-                        return;
-
-                    //三级视觉处理，得到轮廓路径坐标
-                    //三级视觉只获得最靠近视野中心的那个斑点的路径
-                    double[] vision_3_x;
-                    double[] vision_3_y;
-                    int vision_3_num;
-                    cogWin.Job3_Run(out vision_3_x, out vision_3_y, out vision_3_num, 2);
-
-                    if(vision_3_num ==0 || vision_3_x==null || vision_3_y == null)
-                    {
-                        //statusLabel_1.Text = "坏点路径搜索失败！";
-                        workStopped();
-                        return;
-                    }
-
-                    //记录，测试用
-                    string file = "raw pos.txt";
-                    StreamWriter sw = new StreamWriter(file);
-
-                    for (int k = 0; k < vision_3_num; k++)
-                    {
-                        sw.WriteLine(vision_3_x[k]);
-                        sw.WriteLine(vision_3_y[k]);
-                    }
-
-                    sw.WriteLine(vision_3_num);
-                    sw.Flush();
-                    sw.Close();
-
-
-
-
-
-
-
-
-                    if (stopFlag)
-                        return;
-
-                    //坐标间隔处理，得到一系列加工点
-                    double[] work_x;
-                    double[] work_y;
-                    int work_num;
-
-                    datapro(vision_3_x, vision_3_y, vision_3_num, m_prm.gap, out work_x, out work_y, out work_num);
-
-
-                    double axisPos_x, axisPos_y;
-                    moWin.m_motion.Motion_GetRealTimePosAxis(0, out axisPos_x);
-                    moWin.m_motion.Motion_GetRealTimePosAxis(1, out axisPos_y);
-
-                    for (int k = 0; k < work_num; k++ )
-                    {
-                        work_x[k] = axisPos_x - work_x[k];
-                        work_y[k] = axisPos_y - work_y[k];
-                    }
-
-                        //ceshi
-                        file = "work path.txt";
-                    sw = new StreamWriter(file,true);
-
-                    for (int k = 0; k < work_num; k++)
-                    {
-                        sw.WriteLine(work_x[k]);
-                        sw.WriteLine(work_y[k]);
-                    }
-
-                    sw.WriteLine(work_num);
-                    sw.Flush();
-                    sw.Close();
-
-
-                    if (stopFlag)
-                        return;
-                    //激光修复
-                    PTPPrm[] movePrm_work = new PTPPrm[2];
-                    for (int k = 0; k < work_num; k++ )
-                    {
-                        movePrm_work[0].iCoorAxis = 0;
-                        movePrm_work[0].dPos = work_x[k];
-                        movePrm_work[1].iCoorAxis = 1;
-                        movePrm_work[1].dPos = work_y[k];
-
-                        moWin.m_motion.Motion_PToPMove(movePrm_work);
-                        //moWin.m_motion.Motion_LaserOn(1);
-                        if (stopFlag)
-                            return;
-                    }
-                }
-                //检验是否修复成功
-                if (stopFlag)
-                    return;
-            }
 
             //检验是否修复成功
             if (stopFlag)
@@ -515,6 +221,278 @@ namespace RepairLaser
             workStopped();
         }
 
+        private void visionPro_1()
+        {
+            //一级视觉处理，得到一系列坐标
+            double[] vision_1_x;
+            double[] vision_1_y;
+            int vision_1_num;
+            cogWin.Job1_Run(out vision_1_x, out vision_1_y, out vision_1_num);
+
+            if (stopFlag)
+                return;
+            if (vision_1_num <= 0)
+            {
+                Console.WriteLine("not found");
+                workStopped();
+                return;
+            }
+
+            //注意，这里在相对运动时出现未考虑到的情况，即后面点的初始位置已经变化。改用点位运动。
+            //每一级视觉标定时，都是以下级视觉的中心为原点标定的，所以得到的坐标值即*-1 就得到移动到下一级视觉的step值
+            double cPos_1_x, cPos_1_y;
+            moWin.m_motion.Motion_GetRealTimePosAxis(0, out cPos_1_x);
+            moWin.m_motion.Motion_GetRealTimePosAxis(1, out cPos_1_y);
+
+
+            for (int i = 0; i < vision_1_num; i++)
+            {
+
+                PTPPrm[] movePrm_2 = new PTPPrm[3];
+
+                PTPPrm prm_2_x;
+                prm_2_x.iCoorAxis = 0;
+                prm_2_x.dPos = cPos_1_x - vision_1_x[i];
+
+                PTPPrm prm_2_y;
+                prm_2_y.iCoorAxis = 1;
+                prm_2_y.dPos = cPos_1_y - vision_1_y[i];
+
+
+                PTPPrm prm_2_z;
+                prm_2_z.iCoorAxis = 2;
+                prm_2_z.dPos = m_prm.FocusPos_z_2;
+
+                movePrm_2[0] = prm_2_x;
+                movePrm_2[1] = prm_2_y;
+                movePrm_2[2] = prm_2_z;
+                moWin.m_motion.Motion_PToPMove(movePrm_2);
+
+
+
+                if (stopFlag)
+                    return;
+
+                //物镜切换、自动对焦
+                if (stopFlag)
+                    return;
+
+                //二级视觉处理，得到若干坐标
+                visionPro_2();
+
+                if (stopFlag)
+                    return;
+
+                //检验是否修复成功
+                if (stopFlag)
+                    return;
+            }
+        }
+        private void visionPro_2()
+        {
+            //二级视觉处理，得到若干坐标
+            double[] vision_2_x;
+            double[] vision_2_y;
+            int vision_2_num;
+            cogWin.Job2_Run(out vision_2_x, out vision_2_y, out vision_2_num);
+
+            if (stopFlag)
+                return;
+
+            double cPos_2_x, cPos_2_y;
+            moWin.m_motion.Motion_GetRealTimePosAxis(0, out cPos_2_x);
+            moWin.m_motion.Motion_GetRealTimePosAxis(1, out cPos_2_y);
+
+
+
+
+            for (int j = 0; j < vision_2_num; j++)
+            {
+                PTPPrm[] movePrm_3 = new PTPPrm[3];
+
+                PTPPrm prm_3_x;
+                prm_3_x.iCoorAxis = 0;
+                prm_3_x.dPos = cPos_2_x - vision_2_x[j];
+
+                PTPPrm prm_3_y;
+                prm_3_y.iCoorAxis = 1;
+                prm_3_y.dPos = cPos_2_y - vision_2_y[j];
+
+
+                PTPPrm prm_3_z;
+                prm_3_z.iCoorAxis = 2;
+                prm_3_z.dPos = m_prm.FocusPos_z;
+
+
+                movePrm_3[0] = prm_3_x;
+                movePrm_3[1] = prm_3_y;
+                movePrm_3[2] = prm_3_z;
+                moWin.m_motion.Motion_PToPMove(movePrm_3);
+
+
+
+                if (stopFlag)
+                    return;
+
+                //物镜切换、自动对焦
+                if (stopFlag)
+                    return;
+
+                //三级视觉处理，得到轮廓路径坐标
+                //三级视觉只获得最靠近视野中心的那个斑点的路径
+                visionPro_3();
+
+                if (stopFlag)
+                    return;
+            }
+        }
+
+        //对于是否需要根据运行成功返回bool值
+        //暂时不需要，一个坏点搜索失败可以弹出一个警告框/写一个log或者完全不处理，继续修复下一个坏点
+        //如果是因为stopflag而停止，上层调用中应该在函数返回后进行stopFlag判定,调用栈依次退出即可
+        //如果在中间发生了严重错误，必须停止整个加工流程，则可以设置stopFlag
+        private void visionPro_3()
+        {
+            double[] vision_3_x;
+            double[] vision_3_y;
+            int vision_3_num;
+            cogWin.Job3_Run(out vision_3_x, out vision_3_y, out vision_3_num, 2);
+
+            if (vision_3_num == 0 || vision_3_x == null || vision_3_y == null)
+            {
+                //statusLabel_1.Text = "坏点路径搜索失败！";
+                workStopped();
+                return ;
+            }
+
+            //记录，测试用
+            string file = "raw pos.txt";
+            StreamWriter sw = new StreamWriter(file);
+
+            for (int k = 0; k < vision_3_num; k++)
+            {
+                sw.WriteLine(vision_3_x[k]);
+                sw.WriteLine(vision_3_y[k]);
+            }
+
+            sw.WriteLine(vision_3_num);
+            sw.Flush();
+            sw.Close();
+
+
+
+            if (stopFlag)
+                return;
+
+            //坐标间隔处理，得到一系列加工点
+            double[] work_x;
+            double[] work_y;
+            int work_num;
+
+            datapro(vision_3_x, vision_3_y, vision_3_num, m_prm.gap, out work_x, out work_y, out work_num);
+
+
+            //将相对位置转换为绝对位置
+            double axisPos_x, axisPos_y;
+            moWin.m_motion.Motion_GetRealTimePosAxis(0, out axisPos_x);
+            moWin.m_motion.Motion_GetRealTimePosAxis(1, out axisPos_y);
+
+            for (int k = 0; k < work_num; k++)
+            {
+                work_x[k] = axisPos_x - work_x[k];
+                work_y[k] = axisPos_y - work_y[k];
+            }
+
+            //路径记录，用于测试
+            file = "work path.txt";
+            sw = new StreamWriter(file, true);
+
+            for (int k = 0; k < work_num; k++)
+            {
+                sw.WriteLine(work_x[k]);
+                sw.WriteLine(work_y[k]);
+            }
+
+            sw.WriteLine(work_num);
+            sw.Flush();
+            sw.Close();
+
+
+            if (stopFlag)
+                return;
+            //激光修复
+            PTPPrm[] movePrm_work = new PTPPrm[2];
+            for (int k = 0; k < work_num; k++)
+            {
+                movePrm_work[0].iCoorAxis = 0;
+                movePrm_work[0].dPos = work_x[k];
+                movePrm_work[1].iCoorAxis = 1;
+                movePrm_work[1].dPos = work_y[k];
+
+                moWin.m_motion.Motion_PToPMove(movePrm_work);
+                //moWin.m_motion.Motion_LaserOn(1);
+                if (stopFlag)
+                    return;
+            }
+        }
+
+        //移动到记录位置公用函数
+        //num：1-10时为用户自定义，21，22，23分别为上料，拍照，下料位置
+        //type=0时为阻塞式，type=1时为非阻塞式，默认为0
+        private void goto_recordPos(int num, int type)
+        {
+            double x, y;
+            switch(num)
+            {
+                case 21:
+                    x = m_prm.startPos_x;
+                    y = m_prm.startPos_y;
+                    break;
+                case 22:
+                    x = m_prm.PhotoPos_x;
+                    y = m_prm.PhotoPos_y;
+                    break;
+                case 23:
+                    x = m_prm.endPos_x;
+                    y = m_prm.endPos_y;
+                    break;
+                default:
+                    //在这里添加自定义位置的判断和处理
+                    return;
+                    break;
+            }
+
+            PTPPrm[] movePrm = new PTPPrm[2];
+            movePrm[0].iCoorAxis = 0;
+            movePrm[0].dPos = x;
+
+            movePrm[1].iCoorAxis = 1;
+            movePrm[1].dPos = y;
+
+            switch (type)
+            {
+                case 0:
+                    moWin.m_motion.Motion_PToPMove(movePrm);
+                    break;
+                case 1:
+                    moWin.Motion_PToPMove_unblock(movePrm);
+                    break;
+            }
+        }
+        private void goto_photoPos(int type=0)
+        {
+            goto_recordPos(22, type);
+        }
+
+        private void goto_endPos(int type=0)
+        {
+            goto_recordPos(23, type);
+        }
+
+        private void goto_startPos(int type=0)
+        {
+            goto_recordPos(21, type);
+        }
         private void testWork()
         {
 
@@ -661,14 +639,7 @@ namespace RepairLaser
         }
         private void button_StartPos_mv_Click(object sender, EventArgs e)
         {
-            PTPPrm[] movePrm = new PTPPrm[2];
-            movePrm[0].iCoorAxis = 0;
-            movePrm[0].dPos = m_prm.startPos_x;
-
-            movePrm[1].iCoorAxis = 1;
-            movePrm[1].dPos = m_prm.startPos_y;
-
-            moWin.Motion_PToPMove_unblock(movePrm);
+            goto_startPos(1);
 
         }
 
@@ -708,14 +679,7 @@ namespace RepairLaser
         }
         private void button_PhotoPos_mv_Click(object sender, EventArgs e)
         {
-            PTPPrm[] movePrm = new PTPPrm[2];
-            movePrm[0].iCoorAxis = 0;
-            movePrm[0].dPos = m_prm.PhotoPos_x;
-
-            movePrm[1].iCoorAxis = 1;
-            movePrm[1].dPos = m_prm.PhotoPos_y;
-
-            moWin.Motion_PToPMove_unblock(movePrm);
+            goto_photoPos(1);
         }
 
         private void button_EndPos_rc_Click(object sender, EventArgs e)
@@ -752,14 +716,7 @@ namespace RepairLaser
         }
         private void button_EndPos_mv_Click(object sender, EventArgs e)
         {
-            PTPPrm[] movePrm = new PTPPrm[2];
-            movePrm[0].iCoorAxis = 0;
-            movePrm[0].dPos = m_prm.endPos_x;
-
-            movePrm[1].iCoorAxis = 1;
-            movePrm[1].dPos = m_prm.endPos_y;
-
-            moWin.Motion_PToPMove_unblock(movePrm);
+            goto_endPos(1);
         }
 
 
