@@ -1,0 +1,32 @@
+#ifndef _DEFINE_H_V1_20170227_
+#define _DEFINE_H_V1_20170227_
+
+#define COORDI_AXISX			0
+#define COORDI_AXISY			1
+#define COORDI_AXISZ			2
+#define COORDI_AXISC			3
+#define COORDI_AXISU			4
+#define COORDI_AXISW			5
+#define COORDI_AXISA			6
+#define COORDI_AXISB			7
+#define MAX_AXISNUM				4
+#define COORDI_AXISXYCOMBINE	9
+
+#define ID_MES_INITOOLBARGRAPH	WM_USER + 2
+#define	BEGIN_MARK				WM_USER + 3
+#define SHOWMSGTOLIST			WM_USER + 4
+#define SHOWGRAPHLIST			WM_USER + 5
+#define WM_SV_DISPLAY_MOUSEDOWN	WM_USER + 6
+#define SHOWOBJECTPROPERTY		WM_USER + 7
+#define HIDEOBJECTPROPERTY		WM_USER + 8
+#define UPDATEACTIVEDOC			WM_USER + 9
+#define SELECTGRAPH				WM_USER + 10
+
+#define MAX_SIZE				64000
+#define SHOWPIXELUNIT			20
+#define _USE_MATH_DEFINES 
+#include <math.h> 
+
+
+
+#endif
