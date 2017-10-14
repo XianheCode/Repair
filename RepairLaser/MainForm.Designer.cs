@@ -31,15 +31,18 @@
             this.panel_Vision = new System.Windows.Forms.Panel();
             this.panel_Motion = new System.Windows.Forms.Panel();
             this.groupBox_Operate = new System.Windows.Forms.GroupBox();
+            this.btn_goBack = new System.Windows.Forms.Button();
             this.button_stopWork = new System.Windows.Forms.Button();
             this.button_startWork = new System.Windows.Forms.Button();
             this.groupBox_prm = new System.Windows.Forms.GroupBox();
+            this.btn_testJob3 = new System.Windows.Forms.Button();
+            this.btn_test = new System.Windows.Forms.Button();
             this.button_savePrm = new System.Windows.Forms.Button();
             this.groupBox_otherPrm = new System.Windows.Forms.GroupBox();
+            this.gb_zhiju = new System.Windows.Forms.GroupBox();
             this.btn_pushdown = new System.Windows.Forms.Button();
-            this.btn_absorb = new System.Windows.Forms.Button();
             this.btn_local = new System.Windows.Forms.Button();
-            this.btn_testJob3 = new System.Windows.Forms.Button();
+            this.btn_absorb = new System.Windows.Forms.Button();
             this.btn_setMotionPrm = new System.Windows.Forms.Button();
             this.button_SetSignalPrm = new System.Windows.Forms.Button();
             this.btn_cali = new System.Windows.Forms.Button();
@@ -71,15 +74,19 @@
             this.textBox_StartPos_y = new System.Windows.Forms.TextBox();
             this.button_StartPos_rc = new System.Windows.Forms.Button();
             this.button_StartPos_mv = new System.Windows.Forms.Button();
-            this.btn_goBack = new System.Windows.Forms.Button();
-            this.gb_zhiju = new System.Windows.Forms.GroupBox();
             this.statusLabel_1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+            this.cb_pos = new System.Windows.Forms.ComboBox();
+            this.btn_ap = new System.Windows.Forms.Button();
+            this.tb_pos_x = new System.Windows.Forms.TextBox();
+            this.tb_pos_y = new System.Windows.Forms.TextBox();
+            this.btn_rc = new System.Windows.Forms.Button();
+            this.btn_mv = new System.Windows.Forms.Button();
             this.groupBox_Operate.SuspendLayout();
             this.groupBox_prm.SuspendLayout();
             this.groupBox_otherPrm.SuspendLayout();
-            this.groupBox_posPrm.SuspendLayout();
             this.gb_zhiju.SuspendLayout();
+            this.groupBox_posPrm.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -110,6 +117,16 @@
             this.groupBox_Operate.TabIndex = 3;
             this.groupBox_Operate.TabStop = false;
             // 
+            // btn_goBack
+            // 
+            this.btn_goBack.Location = new System.Drawing.Point(18, 176);
+            this.btn_goBack.Name = "btn_goBack";
+            this.btn_goBack.Size = new System.Drawing.Size(100, 33);
+            this.btn_goBack.TabIndex = 3;
+            this.btn_goBack.Text = "回到初始状态";
+            this.btn_goBack.UseVisualStyleBackColor = true;
+            this.btn_goBack.Click += new System.EventHandler(this.btn_goBack_Click);
+            // 
             // button_stopWork
             // 
             this.button_stopWork.Location = new System.Drawing.Point(18, 114);
@@ -132,6 +149,8 @@
             // 
             // groupBox_prm
             // 
+            this.groupBox_prm.Controls.Add(this.btn_testJob3);
+            this.groupBox_prm.Controls.Add(this.btn_test);
             this.groupBox_prm.Controls.Add(this.button_savePrm);
             this.groupBox_prm.Controls.Add(this.groupBox_otherPrm);
             this.groupBox_prm.Controls.Add(this.groupBox_posPrm);
@@ -140,6 +159,25 @@
             this.groupBox_prm.Size = new System.Drawing.Size(1212, 241);
             this.groupBox_prm.TabIndex = 4;
             this.groupBox_prm.TabStop = false;
+            // 
+            // btn_testJob3
+            // 
+            this.btn_testJob3.Location = new System.Drawing.Point(902, 124);
+            this.btn_testJob3.Name = "btn_testJob3";
+            this.btn_testJob3.Size = new System.Drawing.Size(61, 45);
+            this.btn_testJob3.TabIndex = 29;
+            this.btn_testJob3.Text = "RunJob3并分析路径";
+            this.btn_testJob3.UseVisualStyleBackColor = true;
+            // 
+            // btn_test
+            // 
+            this.btn_test.Location = new System.Drawing.Point(989, 124);
+            this.btn_test.Name = "btn_test";
+            this.btn_test.Size = new System.Drawing.Size(68, 45);
+            this.btn_test.TabIndex = 24;
+            this.btn_test.Text = "测试用";
+            this.btn_test.UseVisualStyleBackColor = true;
+            this.btn_test.Click += new System.EventHandler(this.btn_test_Click);
             // 
             // button_savePrm
             // 
@@ -153,7 +191,6 @@
             // groupBox_otherPrm
             // 
             this.groupBox_otherPrm.Controls.Add(this.gb_zhiju);
-            this.groupBox_otherPrm.Controls.Add(this.btn_testJob3);
             this.groupBox_otherPrm.Controls.Add(this.btn_setMotionPrm);
             this.groupBox_otherPrm.Controls.Add(this.button_SetSignalPrm);
             this.groupBox_otherPrm.Controls.Add(this.btn_cali);
@@ -167,6 +204,18 @@
             this.groupBox_otherPrm.TabStop = false;
             this.groupBox_otherPrm.Text = "其他参数";
             // 
+            // gb_zhiju
+            // 
+            this.gb_zhiju.Controls.Add(this.btn_pushdown);
+            this.gb_zhiju.Controls.Add(this.btn_local);
+            this.gb_zhiju.Controls.Add(this.btn_absorb);
+            this.gb_zhiju.Location = new System.Drawing.Point(221, 44);
+            this.gb_zhiju.Name = "gb_zhiju";
+            this.gb_zhiju.Size = new System.Drawing.Size(115, 134);
+            this.gb_zhiju.TabIndex = 32;
+            this.gb_zhiju.TabStop = false;
+            this.gb_zhiju.Text = "治具控制";
+            // 
             // btn_pushdown
             // 
             this.btn_pushdown.Location = new System.Drawing.Point(21, 89);
@@ -176,16 +225,6 @@
             this.btn_pushdown.Text = "下压";
             this.btn_pushdown.UseVisualStyleBackColor = true;
             this.btn_pushdown.Click += new System.EventHandler(this.btn_pushdown_Click);
-            // 
-            // btn_absorb
-            // 
-            this.btn_absorb.Location = new System.Drawing.Point(21, 60);
-            this.btn_absorb.Name = "btn_absorb";
-            this.btn_absorb.Size = new System.Drawing.Size(75, 23);
-            this.btn_absorb.TabIndex = 30;
-            this.btn_absorb.Text = "吸附";
-            this.btn_absorb.UseVisualStyleBackColor = true;
-            this.btn_absorb.Click += new System.EventHandler(this.btn_absorb_Click);
             // 
             // btn_local
             // 
@@ -197,15 +236,15 @@
             this.btn_local.UseVisualStyleBackColor = true;
             this.btn_local.Click += new System.EventHandler(this.btn_local_Click);
             // 
-            // btn_testJob3
+            // btn_absorb
             // 
-            this.btn_testJob3.Location = new System.Drawing.Point(119, 133);
-            this.btn_testJob3.Name = "btn_testJob3";
-            this.btn_testJob3.Size = new System.Drawing.Size(61, 45);
-            this.btn_testJob3.TabIndex = 28;
-            this.btn_testJob3.Text = "RunJob3并分析路径";
-            this.btn_testJob3.UseVisualStyleBackColor = true;
-            this.btn_testJob3.Click += new System.EventHandler(this.btn_testJob3_Click);
+            this.btn_absorb.Location = new System.Drawing.Point(21, 60);
+            this.btn_absorb.Name = "btn_absorb";
+            this.btn_absorb.Size = new System.Drawing.Size(75, 23);
+            this.btn_absorb.TabIndex = 30;
+            this.btn_absorb.Text = "吸附";
+            this.btn_absorb.UseVisualStyleBackColor = true;
+            this.btn_absorb.Click += new System.EventHandler(this.btn_absorb_Click);
             // 
             // btn_setMotionPrm
             // 
@@ -265,6 +304,12 @@
             // 
             // groupBox_posPrm
             // 
+            this.groupBox_posPrm.Controls.Add(this.btn_ap);
+            this.groupBox_posPrm.Controls.Add(this.tb_pos_x);
+            this.groupBox_posPrm.Controls.Add(this.tb_pos_y);
+            this.groupBox_posPrm.Controls.Add(this.btn_rc);
+            this.groupBox_posPrm.Controls.Add(this.btn_mv);
+            this.groupBox_posPrm.Controls.Add(this.cb_pos);
             this.groupBox_posPrm.Controls.Add(this.tb_focusZPos2);
             this.groupBox_posPrm.Controls.Add(this.btn_focusMove2);
             this.groupBox_posPrm.Controls.Add(this.btn_focusRcd2);
@@ -511,28 +556,6 @@
             this.button_StartPos_mv.UseVisualStyleBackColor = true;
             this.button_StartPos_mv.Click += new System.EventHandler(this.button_StartPos_mv_Click);
             // 
-            // btn_goBack
-            // 
-            this.btn_goBack.Location = new System.Drawing.Point(18, 176);
-            this.btn_goBack.Name = "btn_goBack";
-            this.btn_goBack.Size = new System.Drawing.Size(100, 33);
-            this.btn_goBack.TabIndex = 3;
-            this.btn_goBack.Text = "回到初始状态";
-            this.btn_goBack.UseVisualStyleBackColor = true;
-            this.btn_goBack.Click += new System.EventHandler(this.btn_goBack_Click);
-            // 
-            // gb_zhiju
-            // 
-            this.gb_zhiju.Controls.Add(this.btn_pushdown);
-            this.gb_zhiju.Controls.Add(this.btn_local);
-            this.gb_zhiju.Controls.Add(this.btn_absorb);
-            this.gb_zhiju.Location = new System.Drawing.Point(221, 44);
-            this.gb_zhiju.Name = "gb_zhiju";
-            this.gb_zhiju.Size = new System.Drawing.Size(115, 134);
-            this.gb_zhiju.TabIndex = 32;
-            this.gb_zhiju.TabStop = false;
-            this.gb_zhiju.Text = "治具控制";
-            // 
             // statusLabel_1
             // 
             this.statusLabel_1.AutoSize = false;
@@ -550,6 +573,69 @@
             this.statusStrip1.Size = new System.Drawing.Size(1424, 22);
             this.statusStrip1.TabIndex = 5;
             this.statusStrip1.Text = "status_MainForm";
+            // 
+            // cb_pos
+            // 
+            this.cb_pos.FormattingEnabled = true;
+            this.cb_pos.Items.AddRange(new object[] {
+            "位置1",
+            "位置2",
+            "位置3",
+            "位置4",
+            "位置5",
+            "位置6",
+            "位置7",
+            "位置8",
+            "位置9"});
+            this.cb_pos.Location = new System.Drawing.Point(8, 113);
+            this.cb_pos.Name = "cb_pos";
+            this.cb_pos.Size = new System.Drawing.Size(57, 20);
+            this.cb_pos.TabIndex = 39;
+            this.cb_pos.SelectedIndexChanged += new System.EventHandler(this.cb_pos_SelectedIndexChanged);
+            // 
+            // btn_ap
+            // 
+            this.btn_ap.Location = new System.Drawing.Point(220, 111);
+            this.btn_ap.Name = "btn_ap";
+            this.btn_ap.Size = new System.Drawing.Size(53, 23);
+            this.btn_ap.TabIndex = 44;
+            this.btn_ap.Text = "应用";
+            this.btn_ap.UseVisualStyleBackColor = true;
+            this.btn_ap.Click += new System.EventHandler(this.btn_ap_Click);
+            // 
+            // tb_pos_x
+            // 
+            this.tb_pos_x.Location = new System.Drawing.Point(74, 112);
+            this.tb_pos_x.Name = "tb_pos_x";
+            this.tb_pos_x.Size = new System.Drawing.Size(64, 21);
+            this.tb_pos_x.TabIndex = 40;
+            // 
+            // tb_pos_y
+            // 
+            this.tb_pos_y.Location = new System.Drawing.Point(147, 112);
+            this.tb_pos_y.Name = "tb_pos_y";
+            this.tb_pos_y.Size = new System.Drawing.Size(64, 21);
+            this.tb_pos_y.TabIndex = 41;
+            // 
+            // btn_rc
+            // 
+            this.btn_rc.Location = new System.Drawing.Point(344, 111);
+            this.btn_rc.Name = "btn_rc";
+            this.btn_rc.Size = new System.Drawing.Size(53, 23);
+            this.btn_rc.TabIndex = 42;
+            this.btn_rc.Text = "记录";
+            this.btn_rc.UseVisualStyleBackColor = true;
+            this.btn_rc.Click += new System.EventHandler(this.btn_rc_Click);
+            // 
+            // btn_mv
+            // 
+            this.btn_mv.Location = new System.Drawing.Point(282, 111);
+            this.btn_mv.Name = "btn_mv";
+            this.btn_mv.Size = new System.Drawing.Size(53, 23);
+            this.btn_mv.TabIndex = 43;
+            this.btn_mv.Text = "移动";
+            this.btn_mv.UseVisualStyleBackColor = true;
+            this.btn_mv.Click += new System.EventHandler(this.btn_mv_Click);
             // 
             // MainForm
             // 
@@ -573,9 +659,9 @@
             this.groupBox_prm.ResumeLayout(false);
             this.groupBox_otherPrm.ResumeLayout(false);
             this.groupBox_otherPrm.PerformLayout();
+            this.gb_zhiju.ResumeLayout(false);
             this.groupBox_posPrm.ResumeLayout(false);
             this.groupBox_posPrm.PerformLayout();
-            this.gb_zhiju.ResumeLayout(false);
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
             this.ResumeLayout(false);
@@ -624,7 +710,6 @@
         private System.Windows.Forms.Button btn_focusRcd2;
         private System.Windows.Forms.Button btn_setMotionPrm;
         private System.Windows.Forms.Button button_savePrm;
-        private System.Windows.Forms.Button btn_testJob3;
         private System.Windows.Forms.Button btn_pushdown;
         private System.Windows.Forms.Button btn_absorb;
         private System.Windows.Forms.Button btn_local;
@@ -632,6 +717,14 @@
         private System.Windows.Forms.GroupBox gb_zhiju;
         private System.Windows.Forms.ToolStripStatusLabel statusLabel_1;
         private System.Windows.Forms.StatusStrip statusStrip1;
+        private System.Windows.Forms.Button btn_testJob3;
+        private System.Windows.Forms.Button btn_test;
+        private System.Windows.Forms.Button btn_ap;
+        private System.Windows.Forms.TextBox tb_pos_x;
+        private System.Windows.Forms.TextBox tb_pos_y;
+        private System.Windows.Forms.Button btn_rc;
+        private System.Windows.Forms.Button btn_mv;
+        private System.Windows.Forms.ComboBox cb_pos;
     }
 }
 

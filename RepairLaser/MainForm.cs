@@ -14,6 +14,7 @@
  *     以上的停止加工都不会进行复原，而是停在当前位置等待人工处理。
  *     复原操作包括：回到初始位置、取消点亮信号，释放治具等。
  *     
+ * 
  * 3.自动复原
  *     为了方便在停止后自动复原，添加复原按钮，其动作顺序为：
  *     -回到初始位置-取消点亮信号-释放治具
@@ -99,6 +100,10 @@ namespace RepairLaser
 
 
             textBox_gap.Text = m_prm.gap.ToString();
+
+            cb_pos.SelectedIndex = 0;
+            tb_pos_x.Text = m_prm.pos_x[0].ToString();
+            tb_pos_y.Text = m_prm.pos_y[0].ToString();
             
         }
 
@@ -108,11 +113,12 @@ namespace RepairLaser
 
             initPrmTextbox();
 
+            //直接禁用整个mowin，不再调用其使能/禁用函数
             workStarted += disableForm;
-            workStarted += moWin.disable_moveBtn;
+            //workStarted += moWin.disable_moveBtn;
 
             workStopped += enableForm;
-            workStopped += moWin.enable_moveBtn;
+            //workStopped += moWin.enable_moveBtn;
 
             moWin.moveStarted += this.disableForm;
             moWin.moveStopped += this.enableForm;
@@ -441,6 +447,12 @@ namespace RepairLaser
         //type=0时为阻塞式，type=1时为非阻塞式，默认为0
         private void goto_recordPos(int num, int type)
         {
+            if (num > 23 || (num > 9 && num < 21) || num<0)
+            {
+                statusLabel_1.Text = "索引错误";
+                return;
+            }
+
             double x, y;
             switch(num)
             {
@@ -457,8 +469,8 @@ namespace RepairLaser
                     y = m_prm.endPos_y;
                     break;
                 default:
-                    //在这里添加自定义位置的判断和处理
-                    return;
+                    x = m_prm.pos_x[num];
+                    y = m_prm.pos_y[num];
                     break;
             }
 
@@ -479,6 +491,126 @@ namespace RepairLaser
                     break;
             }
         }
+
+        private void rc_recordPos(int num)
+        {
+            double pos_x, pos_y;
+            if (moWin.m_motion.Motion_GetRealTimePosAxis(0, out pos_x) &&
+            moWin.m_motion.Motion_GetRealTimePosAxis(1, out pos_y))
+            {
+                if (num > 23 || (num > 9 && num < 21) || num<0)
+                {
+                    statusLabel_1.Text = "索引错误";
+                    return;
+                }
+
+                
+
+                switch (num)
+                {
+                    case 21:
+                        textBox_StartPos_x.Text = pos_x.ToString();
+                        textBox_StartPos_y.Text = pos_y.ToString();
+                        break;
+                    case 22:
+                        textBox_PhotoPos_x.Text = pos_x.ToString();
+                        textBox_PhotoPos_y.Text = pos_y.ToString();
+                        break;
+                    case 23:
+                        textBox_EndPos_x.Text = pos_x.ToString();
+                        textBox_EndPos_y.Text = pos_y.ToString();
+                        break;
+                    default:
+                        tb_pos_x.Text = pos_x.ToString();
+                        tb_pos_y.Text = pos_y.ToString();
+                        break;
+
+                }
+
+                statusLabel_1.Text = "位置记录成功";
+
+            }
+            else
+            {
+                statusLabel_1.Text = "位置记录失败";
+            }
+        }
+
+        private void ap_recordPos(int num)
+        {
+            if (num > 23 || (num > 9 && num < 21) || num < 0)
+            {
+                statusLabel_1.Text = "索引错误";
+                return;
+            }
+
+            double temp1, temp2;
+            bool ret1, ret2;
+
+            switch(num)
+            {
+                case 21:
+                    ret1 = double.TryParse(this.textBox_StartPos_x.Text, out temp1);
+                    ret2 = double.TryParse(this.textBox_StartPos_y.Text, out temp2);
+                    if (ret1 && ret2)
+                    {
+                        m_prm.startPos_x = temp1;
+                        m_prm.startPos_y = temp2;
+                        statusLabel_1.Text = "参数应用成功";
+                    }
+                    else
+                    {
+                        statusLabel_1.Text = "参数应用失败,请检查参数格式";
+                       
+                    }
+                    break;
+                case 22:
+                    ret1 = double.TryParse(this.textBox_PhotoPos_x.Text, out temp1);
+                    ret2 = double.TryParse(this.textBox_PhotoPos_y.Text, out temp2);
+                    if (ret1 && ret2)
+                    {
+                        m_prm.PhotoPos_x = temp1;
+                        m_prm.PhotoPos_y = temp2;
+                        statusLabel_1.Text = "参数应用成功";
+                    }
+                    else
+                    {
+                        statusLabel_1.Text = "参数应用失败,请检查参数格式";
+                    }
+                    break;
+                case 23:
+                    ret1 = double.TryParse(this.textBox_EndPos_x.Text, out temp1);
+                    ret2 = double.TryParse(this.textBox_EndPos_y.Text, out temp2);
+                    if (ret1 && ret2)
+                    {
+                        m_prm.endPos_x = temp1;
+                        m_prm.endPos_y = temp2;
+                        statusLabel_1.Text = "参数应用成功";
+                    }
+                    else
+                    {
+                        statusLabel_1.Text = "参数应用失败,请检查参数格式";
+                    }
+                    break;
+                default:
+                    ret1 = double.TryParse(this.tb_pos_x.Text, out temp1);
+                    ret2 = double.TryParse(this.tb_pos_y.Text, out temp2);
+                    if (ret1 && ret2)
+                    {
+                        m_prm.pos_x[num] = temp1;
+                        m_prm.pos_y[num] = temp2;
+                        statusLabel_1.Text = "参数应用成功";
+                    }
+                    else
+                    {
+                        statusLabel_1.Text = "参数应用失败,请检查参数格式";
+                    }
+                    break;
+
+            }
+
+        }
+
         private void goto_photoPos(int type=0)
         {
             goto_recordPos(22, type);
@@ -495,13 +627,9 @@ namespace RepairLaser
         }
         private void testWork()
         {
-
-            Console.WriteLine("do the work");
-            Thread.Sleep(3000);
-            if (workStopped != null)
-                workStopped();
+            visionPro_3();
         }
-
+          
 
         private void getBoundary()
         {
@@ -572,6 +700,7 @@ namespace RepairLaser
             groupBox_posPrm.Enabled = true;
             groupBox_otherPrm.Enabled = true;
             button_SetSignalPrm.Enabled = true;
+            moWin.Enabled = true;
 
         }
 
@@ -587,6 +716,7 @@ namespace RepairLaser
             groupBox_posPrm.Enabled = false;
             groupBox_otherPrm.Enabled = false;
             button_SetSignalPrm.Enabled = false;
+            moWin.Enabled = false;
         }
 
  
@@ -605,19 +735,7 @@ namespace RepairLaser
         //移动：移动到控制参数中的位置，注意不一定是TextBox中的数值
         private void button_StartPos_rc_Click(object sender, EventArgs e)
         {
-            double pos_x, pos_y;
-            if(moWin.m_motion.Motion_GetRealTimePosAxis(0, out pos_x) &&
-            moWin.m_motion.Motion_GetRealTimePosAxis(1, out pos_y))
-            {
-                textBox_StartPos_x.Text = pos_x.ToString();
-                textBox_StartPos_y.Text = pos_y.ToString();
-                statusLabel_1.Text = "拍照位置记录成功";
-            }
-            else
-            {
-                statusLabel_1.Text = "拍照位置记录失败";
-            }
-
+            rc_recordPos(21);
         }
 
         private void button_StartPos_ap_Click(object sender, EventArgs e)
@@ -646,18 +764,7 @@ namespace RepairLaser
 
         private void button_PhotoPos_rc_Click(object sender, EventArgs e)
         {
-            double photo_x, photo_y;
-            if (moWin.m_motion.Motion_GetRealTimePosAxis(0, out photo_x) && moWin.m_motion.Motion_GetRealTimePosAxis(1, out photo_y))
-            {
-
-                textBox_PhotoPos_x.Text = photo_x.ToString();
-                textBox_PhotoPos_y.Text = photo_y.ToString();
-                statusLabel_1.Text = "拍照位置记录成功";
-            }
-            else
-            {
-                statusLabel_1.Text = "拍照位置记录失败";
-            }
+            rc_recordPos(22);
         }
 
         private void button_PhotoPos_ap_Click(object sender, EventArgs e)
@@ -684,18 +791,7 @@ namespace RepairLaser
 
         private void button_EndPos_rc_Click(object sender, EventArgs e)
         {
-            double pos_x, pos_y;
-            if (moWin.m_motion.Motion_GetRealTimePosAxis(0, out pos_x) &&
-            moWin.m_motion.Motion_GetRealTimePosAxis(1, out pos_y))
-            {
-                textBox_EndPos_x.Text = pos_x.ToString();
-                textBox_EndPos_y.Text = pos_y.ToString();
-                statusLabel_1.Text = "下料位置记录成功";
-            }
-            else
-            {
-                statusLabel_1.Text = "下料位置记录失败";
-            }
+            rc_recordPos(23);
         }
         private void button_EndPos_ap_Click(object sender, EventArgs e)
         {
@@ -1015,6 +1111,45 @@ namespace RepairLaser
             moWin.m_motion.Motion_OutputBit(1, 1);
             Thread.Sleep(100);
         }
+
+        private void btn_test_Click(object sender, EventArgs e)
+        {
+            if (workStarted != null)
+                workStarted();
+            Thread workThd = new Thread(testWork);
+            workThd.IsBackground = true;
+            if (workStopped != null)
+                workThd.Start();
+        }
+
+        private void cb_pos_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            int i = cb_pos.SelectedIndex;
+            double x = m_prm.pos_x[i];
+            double y = m_prm.pos_y[i];
+
+            tb_pos_x.Text = x.ToString();
+            tb_pos_y.Text = y.ToString();
+        }
+
+        private void btn_rc_Click(object sender, EventArgs e)
+        {
+            rc_recordPos(cb_pos.SelectedIndex);
+
+            
+        }
+
+        private void btn_ap_Click(object sender, EventArgs e)
+        {
+            ap_recordPos(cb_pos.SelectedIndex);
+        }
+
+        private void btn_mv_Click(object sender, EventArgs e)
+        {
+            goto_recordPos(cb_pos.SelectedIndex,0);
+        }
+
+        
 
 
         
