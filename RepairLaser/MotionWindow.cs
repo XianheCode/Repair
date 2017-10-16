@@ -31,7 +31,7 @@ namespace MotionMod
     public partial class MotionWindow : Form
     {
 
-        #region 变量
+        #region 内部变量
         FileStream fs = null;
             StreamWriter sw = null;
 
@@ -43,11 +43,11 @@ namespace MotionMod
         private System.Windows.Forms.Timer m_timer;
 
 
-        #endregion
-
         private string stepText = null;
         private enum mType { POS, STEP, JOG };
         private mType m_moveType;
+
+        #endregion
 
         public MotionWindow()
         {

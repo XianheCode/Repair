@@ -50,6 +50,12 @@
             this.label4 = new System.Windows.Forms.Label();
             this.textBox_gap = new System.Windows.Forms.TextBox();
             this.groupBox_posPrm = new System.Windows.Forms.GroupBox();
+            this.btn_ap = new System.Windows.Forms.Button();
+            this.tb_pos_x = new System.Windows.Forms.TextBox();
+            this.tb_pos_y = new System.Windows.Forms.TextBox();
+            this.btn_rc = new System.Windows.Forms.Button();
+            this.btn_mv = new System.Windows.Forms.Button();
+            this.cb_pos = new System.Windows.Forms.ComboBox();
             this.tb_focusZPos2 = new System.Windows.Forms.TextBox();
             this.btn_focusMove2 = new System.Windows.Forms.Button();
             this.btn_focusRcd2 = new System.Windows.Forms.Button();
@@ -76,12 +82,6 @@
             this.button_StartPos_mv = new System.Windows.Forms.Button();
             this.statusLabel_1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
-            this.cb_pos = new System.Windows.Forms.ComboBox();
-            this.btn_ap = new System.Windows.Forms.Button();
-            this.tb_pos_x = new System.Windows.Forms.TextBox();
-            this.tb_pos_y = new System.Windows.Forms.TextBox();
-            this.btn_rc = new System.Windows.Forms.Button();
-            this.btn_mv = new System.Windows.Forms.Button();
             this.groupBox_Operate.SuspendLayout();
             this.groupBox_prm.SuspendLayout();
             this.groupBox_otherPrm.SuspendLayout();
@@ -341,6 +341,69 @@
             this.groupBox_posPrm.TabStop = false;
             this.groupBox_posPrm.Text = "位置参数";
             // 
+            // btn_ap
+            // 
+            this.btn_ap.Location = new System.Drawing.Point(220, 111);
+            this.btn_ap.Name = "btn_ap";
+            this.btn_ap.Size = new System.Drawing.Size(53, 23);
+            this.btn_ap.TabIndex = 44;
+            this.btn_ap.Text = "应用";
+            this.btn_ap.UseVisualStyleBackColor = true;
+            this.btn_ap.Click += new System.EventHandler(this.btn_ap_Click);
+            // 
+            // tb_pos_x
+            // 
+            this.tb_pos_x.Location = new System.Drawing.Point(74, 112);
+            this.tb_pos_x.Name = "tb_pos_x";
+            this.tb_pos_x.Size = new System.Drawing.Size(64, 21);
+            this.tb_pos_x.TabIndex = 40;
+            // 
+            // tb_pos_y
+            // 
+            this.tb_pos_y.Location = new System.Drawing.Point(147, 112);
+            this.tb_pos_y.Name = "tb_pos_y";
+            this.tb_pos_y.Size = new System.Drawing.Size(64, 21);
+            this.tb_pos_y.TabIndex = 41;
+            // 
+            // btn_rc
+            // 
+            this.btn_rc.Location = new System.Drawing.Point(344, 111);
+            this.btn_rc.Name = "btn_rc";
+            this.btn_rc.Size = new System.Drawing.Size(53, 23);
+            this.btn_rc.TabIndex = 42;
+            this.btn_rc.Text = "记录";
+            this.btn_rc.UseVisualStyleBackColor = true;
+            this.btn_rc.Click += new System.EventHandler(this.btn_rc_Click);
+            // 
+            // btn_mv
+            // 
+            this.btn_mv.Location = new System.Drawing.Point(282, 111);
+            this.btn_mv.Name = "btn_mv";
+            this.btn_mv.Size = new System.Drawing.Size(53, 23);
+            this.btn_mv.TabIndex = 43;
+            this.btn_mv.Text = "移动";
+            this.btn_mv.UseVisualStyleBackColor = true;
+            this.btn_mv.Click += new System.EventHandler(this.btn_mv_Click);
+            // 
+            // cb_pos
+            // 
+            this.cb_pos.FormattingEnabled = true;
+            this.cb_pos.Items.AddRange(new object[] {
+            "位置1",
+            "位置2",
+            "位置3",
+            "位置4",
+            "位置5",
+            "位置6",
+            "位置7",
+            "位置8",
+            "位置9"});
+            this.cb_pos.Location = new System.Drawing.Point(8, 113);
+            this.cb_pos.Name = "cb_pos";
+            this.cb_pos.Size = new System.Drawing.Size(57, 20);
+            this.cb_pos.TabIndex = 39;
+            this.cb_pos.SelectedIndexChanged += new System.EventHandler(this.cb_pos_SelectedIndexChanged);
+            // 
             // tb_focusZPos2
             // 
             this.tb_focusZPos2.Location = new System.Drawing.Point(139, 192);
@@ -573,69 +636,6 @@
             this.statusStrip1.Size = new System.Drawing.Size(1424, 22);
             this.statusStrip1.TabIndex = 5;
             this.statusStrip1.Text = "status_MainForm";
-            // 
-            // cb_pos
-            // 
-            this.cb_pos.FormattingEnabled = true;
-            this.cb_pos.Items.AddRange(new object[] {
-            "位置1",
-            "位置2",
-            "位置3",
-            "位置4",
-            "位置5",
-            "位置6",
-            "位置7",
-            "位置8",
-            "位置9"});
-            this.cb_pos.Location = new System.Drawing.Point(8, 113);
-            this.cb_pos.Name = "cb_pos";
-            this.cb_pos.Size = new System.Drawing.Size(57, 20);
-            this.cb_pos.TabIndex = 39;
-            this.cb_pos.SelectedIndexChanged += new System.EventHandler(this.cb_pos_SelectedIndexChanged);
-            // 
-            // btn_ap
-            // 
-            this.btn_ap.Location = new System.Drawing.Point(220, 111);
-            this.btn_ap.Name = "btn_ap";
-            this.btn_ap.Size = new System.Drawing.Size(53, 23);
-            this.btn_ap.TabIndex = 44;
-            this.btn_ap.Text = "应用";
-            this.btn_ap.UseVisualStyleBackColor = true;
-            this.btn_ap.Click += new System.EventHandler(this.btn_ap_Click);
-            // 
-            // tb_pos_x
-            // 
-            this.tb_pos_x.Location = new System.Drawing.Point(74, 112);
-            this.tb_pos_x.Name = "tb_pos_x";
-            this.tb_pos_x.Size = new System.Drawing.Size(64, 21);
-            this.tb_pos_x.TabIndex = 40;
-            // 
-            // tb_pos_y
-            // 
-            this.tb_pos_y.Location = new System.Drawing.Point(147, 112);
-            this.tb_pos_y.Name = "tb_pos_y";
-            this.tb_pos_y.Size = new System.Drawing.Size(64, 21);
-            this.tb_pos_y.TabIndex = 41;
-            // 
-            // btn_rc
-            // 
-            this.btn_rc.Location = new System.Drawing.Point(344, 111);
-            this.btn_rc.Name = "btn_rc";
-            this.btn_rc.Size = new System.Drawing.Size(53, 23);
-            this.btn_rc.TabIndex = 42;
-            this.btn_rc.Text = "记录";
-            this.btn_rc.UseVisualStyleBackColor = true;
-            this.btn_rc.Click += new System.EventHandler(this.btn_rc_Click);
-            // 
-            // btn_mv
-            // 
-            this.btn_mv.Location = new System.Drawing.Point(282, 111);
-            this.btn_mv.Name = "btn_mv";
-            this.btn_mv.Size = new System.Drawing.Size(53, 23);
-            this.btn_mv.TabIndex = 43;
-            this.btn_mv.Text = "移动";
-            this.btn_mv.UseVisualStyleBackColor = true;
-            this.btn_mv.Click += new System.EventHandler(this.btn_mv_Click);
             // 
             // MainForm
             // 

@@ -450,19 +450,7 @@ namespace VisionMod
 
         }
 
-        //private void initLog()
-        //{
-        //    string path = System.Environment.CurrentDirectory;
-        //    m_strVppFileName = path + "//" + m_strVppFileName;
-        //    logfile = new StreamWriter(m_strLogFileName);
 
-
-        //}
-
-        //private void closeLog()
-        //{
-        //    logfile.Close();
-        //}
 
         //初始化函数2
         private void initToolEdit()

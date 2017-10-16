@@ -94,10 +94,6 @@ namespace MotionMod
     
     public sealed class MotionControl
     {
-
-        private FileStream fs;
-        private StreamWriter sw;
-
         #region DllImport方法
         [DllImport("MotionInterfaceGoogolGTS.dll", EntryPoint = "EC_Init")]
         private static extern int m_Init();
@@ -228,13 +224,25 @@ namespace MotionMod
 
         #endregion
 
+        #region 内部变量
+
+        private FileStream fs;
+        private StreamWriter sw;
+
+
 
         //test data
         private static double pos1 = 0;
         private static double pos2 = 1000;
         private static double pos3 = 2000;
 
-        /*
+        private bool isInit = false;
+        private volatile static MotionControl _instance = null;
+        private static readonly object lockHelper = new object();
+
+        #endregion
+
+        /* test
         #region Test
 
         private static int m_Init() { return 0; }
@@ -420,8 +428,8 @@ namespace MotionMod
         #endregion
         */
 
-        #region 轴方法
-        //C#封装，主要是去掉了指针的使用
+        #region 轴控制函数的C#封装
+        //C#封装，主要是去掉了指针的使用，不再向上层返回int值，而是转换为BOOL值
         public bool Motion_Init()
         {
             int ret = m_Init();
@@ -477,22 +485,19 @@ namespace MotionMod
         }
 
 
-
+        //比较复杂的一个转换，因为C#中存在GC机制，如果不做特殊处理，对象的地址会被gc更改，导致指针失效
         unsafe public bool Motion_SetSglSpeed(SPEEDPrm[] movePrm)
         {
-
-
-
-            
-            
             
             int ilen = movePrm.Length;
 
+            //使用Marshal手动分配内存，不托管给gc
             int size = Marshal.SizeOf(typeof(SPEEDPrm)) * ilen;
-            byte[] bytes = new byte[size];
+            byte[] bytes = new byte[size]; //我也不记得这一句是做什么的了，也许可以删除...
             IntPtr pBuff = Marshal.AllocHGlobal(size);
             long ptr = pBuff.ToInt64();
 
+            //将数组的数据逐个复制进去
             for(int i = 0; i<ilen; i++)
             {
                 IntPtr RPtr = new IntPtr(ptr);
@@ -502,6 +507,7 @@ namespace MotionMod
 
             int ret = m_SetSglSpeed(pBuff, ilen);
 
+            //务必记得手动释放，否则会内存泄漏
             Marshal.FreeHGlobal(pBuff);
             sw.WriteLine("setSpeed:{0}", ret);
             sw.Flush();
@@ -938,11 +944,7 @@ namespace MotionMod
 
         #endregion
 
-        private bool isInit = false;
-        private volatile static MotionControl _instance = null;
-        private static readonly object lockHelper = new object();
-
-        //单例模式
+        #region 单例模式实现
         public static MotionControl CreateMotion()
         {
             if(_instance == null)
@@ -989,5 +991,7 @@ namespace MotionMod
 
             Motion_Close();
         }
+
+        #endregion
     }
 }

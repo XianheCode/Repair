@@ -46,6 +46,7 @@ namespace RepairLaser
 {
     public partial class MainForm : Form
     {
+        #region 内部变量
 
         public MotionWindow moWin = new MotionWindow();
         public CogForm cogWin = new CogForm();
@@ -60,12 +61,13 @@ namespace RepairLaser
         private bool flag_local = false;
         private bool flag_absorb = false;
         private bool flag_push = false;
-      
-
+     
         
         private workPrm m_prm = new workPrm();
 
- 
+        #endregion
+
+        #region 窗体初始化及使能相关底层控制函数
         public MainForm()
         {
             InitializeComponent();
@@ -151,21 +153,90 @@ namespace RepairLaser
             
         }
 
+
+        private void enableForm()
+        {
+            if(InvokeRequired)
+            {
+                this.Invoke(new myWorkDelegate(enableForm));
+                return;
+            }
+
+            button_startWork.Enabled = true;
+            groupBox_posPrm.Enabled = true;
+            groupBox_otherPrm.Enabled = true;
+            button_SetSignalPrm.Enabled = true;
+            moWin.Enabled = true;
+
+        }
+
+        private void disableForm()
+        {
+            if (InvokeRequired)
+            {
+                this.Invoke(new myWorkDelegate(disableForm));
+                return;
+            }
+
+            button_startWork.Enabled = false ;
+            groupBox_posPrm.Enabled = false;
+            groupBox_otherPrm.Enabled = false;
+            button_SetSignalPrm.Enabled = false;
+            moWin.Enabled = false;
+        }
+
+        #endregion
+
+        #region 加工控制函数
         private void button_startWork_Click(object sender, EventArgs e)
         {
-            if(workStarted != null)
+            if (workStarted != null)
                 workStarted();
             Thread workThd = new Thread(doWork);
             workThd.IsBackground = true;
-            if(workStopped != null)
+            if (workStopped != null)
                 workThd.Start();
 
         }
 
+        private void button_stopWork_Click(object sender, EventArgs e)
+        {
+            stopFlag = true;
+            moWin.m_motion.Motion_Stop();
+            Thread.Sleep(200);
+            if(workStopped != null)
+                workStopped();
+        }
+
+        private void btn_test_Click(object sender, EventArgs e)
+        {
+            if (workStarted != null)
+                workStarted();
+            Thread workThd = new Thread(testWork);
+            workThd.IsBackground = true;
+            if (workStopped != null)
+                workThd.Start();
+        }
+
+        private void btn_goBack_Click(object sender, EventArgs e)
+        {
+            signalWin.lightDown();
+            Thread.Sleep(100);
+            lightDown_release();
+
+        }
+
+        #endregion
+
+
+        #region 加工流程系列函数
+
+        //加工函数
+        //流程为 准备工作（状态检测、去起始位、上料、压合点亮） - 调用视觉处理 - 收尾工作（状态检测、压合熄灭、下料、回位等） 
         private void doWork()
         {
             stopFlag = false;
-            
+
             //去放料位置
             if (stopFlag)
                 return;
@@ -190,7 +261,7 @@ namespace RepairLaser
 
             //去拍照位置
             goto_photoPos();
-        
+
 
             if (stopFlag)
                 return;
@@ -200,7 +271,7 @@ namespace RepairLaser
             if (stopFlag)
                 return;
 
-            
+
 
             //检验是否修复成功
             if (stopFlag)
@@ -222,11 +293,13 @@ namespace RepairLaser
             //机械手下料
             if (stopFlag)
                 return;
-            
+
 
             workStopped();
         }
 
+        //视觉处理1
+        //注意，因为视觉处理不同级之间是嵌套关系，所以在visionPro_1中循环调用了visionPro_2，在2中调用了3
         private void visionPro_1()
         {
             //一级视觉处理，得到一系列坐标
@@ -294,6 +367,8 @@ namespace RepairLaser
                     return;
             }
         }
+
+        //视觉处理2
         private void visionPro_2()
         {
             //二级视觉处理，得到若干坐标
@@ -353,6 +428,7 @@ namespace RepairLaser
             }
         }
 
+        //视觉处理3，其中包含了激光修复流程
         //对于是否需要根据运行成功返回bool值
         //暂时不需要，一个坏点搜索失败可以弹出一个警告框/写一个log或者完全不处理，继续修复下一个坏点
         //如果是因为stopflag而停止，上层调用中应该在函数返回后进行stopFlag判定,调用栈依次退出即可
@@ -368,7 +444,7 @@ namespace RepairLaser
             {
                 //statusLabel_1.Text = "坏点路径搜索失败！";
                 workStopped();
-                return ;
+                return;
             }
 
             //记录，测试用
@@ -442,19 +518,152 @@ namespace RepairLaser
             }
         }
 
+
+
+        private void testWork()
+        {
+            visionPro_3();
+        }
+
+        //加工路径处理系列函数，主要分为两部分：1.以gap为间隔进行数据点的稀化 2.有需要的话对轮廓进行外扩
+        private void getBoundary()
+        {
+            double[] pos_x;
+            double[] pos_y;
+            int number;
+
+            double[] path_x;
+            double[] path_y;
+            int path_number;
+
+            cogWin.Job3_Run(out pos_x, out pos_y, out number, 2);
+
+            string file = "pos.txt";
+            StreamWriter sw = new StreamWriter(file);
+
+            for (int i = 0; i < number; i++)
+            {
+                sw.WriteLine(pos_x[i]);
+                sw.WriteLine(pos_y[i]);
+            }
+
+
+
+            sw.WriteLine(number);
+            sw.Flush();
+            sw.Close();
+
+
+            datapro(pos_x, pos_y, number, m_prm.gap, out path_x, out path_y, out path_number);
+
+            file = "path.txt";
+            sw = new StreamWriter(file);
+            for (int i = 0; i < path_number; i++)
+            {
+                sw.WriteLine(path_x[i]);
+                sw.WriteLine(path_y[i]);
+            }
+
+            sw.WriteLine(path_number);
+            sw.Flush();
+            sw.Close();
+
+
+
+
+        }
+
+        private void pointDisper(double gap, double[] vision_x, double[] vision_y, int vision_num,
+            out double[] points_x, out double[] points_y, out int points_num)
+        {
+            gap = 0;
+            points_x = vision_x;
+            points_y = vision_y;
+            points_num = vision_num;
+        }
+
+        static void datapro(double[] pos_x, double[] pos_y, int pos_number,
+    double gap, out double[] path_x, out double[] path_y, out int path_number)
+        {
+            path_x = null;
+            path_y = null;
+            path_number = 0;
+            if (pos_x == null || pos_y == null || pos_number == 0)
+                return;
+            if (pos_x.Length != pos_number || pos_y.Length != pos_number)
+                return;
+            path_x = new double[pos_number];
+            path_y = new double[pos_number];
+
+            path_x[0] = pos_x[0];
+            path_y[0] = pos_y[0];
+
+            int k = 0;
+            double temp_x = path_x[k];
+            double temp_y = path_y[k];
+            k++;
+
+
+            for (int i = 1; i < pos_number; i++)
+            {
+                while (i < pos_number && distance(pos_x[i], pos_y[i], temp_x, temp_y) < gap)
+                {
+                    i++;
+                }
+
+                if (i < pos_number)
+                {
+
+                    temp_x = path_x[k] = pos_x[i];
+                    temp_y = path_y[k] = pos_y[i];
+                    k++;
+
+                }
+                else
+                {
+                    if (distance(pos_x[0], pos_y[0], temp_x, temp_y) >= gap)
+                    {
+                        temp_x = path_x[k] = pos_x[i - 1];
+                        temp_y = path_y[k] = pos_y[i - 1];
+                        k++;
+                    }
+                }
+            }
+
+            path_number = k;
+        }
+
+        static double distance(double x1, double y1, double x2, double y2)
+        {
+            double temp = (y2 - y1) * (y2 - y1) + (x2 - x1) * (x2 - x1);
+            temp = Math.Sqrt(temp);
+            return temp;
+        }
+
+        #endregion
+
+
+        #region 位置记录系列按钮和函数
+
+        //记录、应用、移动
+        //记录：从运动模块读取坐标，并显示在屏幕，但是不会应用
+        //应用：将textBox中的数据应用到控制参数
+        //移动：移动到控制参数中的位置，注意不一定是TextBox中的数值
+
+
         //移动到记录位置公用函数
         //num：1-10时为用户自定义，21，22，23分别为上料，拍照，下料位置
         //type=0时为阻塞式，type=1时为非阻塞式，默认为0
         private void goto_recordPos(int num, int type)
         {
-            if (num > 23 || (num > 9 && num < 21) || num<0)
+            if (num > 23 || (num > 9 && num < 21) || num < 0)
             {
                 statusLabel_1.Text = "索引错误";
                 return;
             }
 
             double x, y;
-            switch(num)
+            switch (num)
             {
                 case 21:
                     x = m_prm.startPos_x;
@@ -492,19 +701,20 @@ namespace RepairLaser
             }
         }
 
+        //记录位置公用函数，序号定义如上
         private void rc_recordPos(int num)
         {
             double pos_x, pos_y;
             if (moWin.m_motion.Motion_GetRealTimePosAxis(0, out pos_x) &&
             moWin.m_motion.Motion_GetRealTimePosAxis(1, out pos_y))
             {
-                if (num > 23 || (num > 9 && num < 21) || num<0)
+                if (num > 23 || (num > 9 && num < 21) || num < 0)
                 {
                     statusLabel_1.Text = "索引错误";
                     return;
                 }
 
-                
+
 
                 switch (num)
                 {
@@ -536,6 +746,7 @@ namespace RepairLaser
             }
         }
 
+        //将输入的位置应用到参数 公用函数
         private void ap_recordPos(int num)
         {
             if (num > 23 || (num > 9 && num < 21) || num < 0)
@@ -547,7 +758,7 @@ namespace RepairLaser
             double temp1, temp2;
             bool ret1, ret2;
 
-            switch(num)
+            switch (num)
             {
                 case 21:
                     ret1 = double.TryParse(this.textBox_StartPos_x.Text, out temp1);
@@ -561,7 +772,7 @@ namespace RepairLaser
                     else
                     {
                         statusLabel_1.Text = "参数应用失败,请检查参数格式";
-                       
+
                     }
                     break;
                 case 22:
@@ -611,133 +822,25 @@ namespace RepairLaser
 
         }
 
-        private void goto_photoPos(int type=0)
+        //提取出这几个常用位置的移动函数，以供加工流程使用
+        private void goto_photoPos(int type = 0)
         {
             goto_recordPos(22, type);
         }
-
-        private void goto_endPos(int type=0)
+        private void goto_endPos(int type = 0)
         {
             goto_recordPos(23, type);
         }
-
-        private void goto_startPos(int type=0)
+        private void goto_startPos(int type = 0)
         {
             goto_recordPos(21, type);
         }
-        private void testWork()
-        {
-            visionPro_3();
-        }
-          
 
-        private void getBoundary()
-        {
-            double[] pos_x;
-            double[] pos_y;
-            int number;
-
-            double[] path_x;
-            double[] path_y;
-            int path_number;
-
-            cogWin.Job3_Run(out pos_x, out pos_y, out number, 2);
-
-            string file = "pos.txt";
-            StreamWriter sw = new StreamWriter(file);
-
-            for(int i=0;i<number;i++)
-            {
-                sw.WriteLine(pos_x[i]);
-                sw.WriteLine(pos_y[i]);
-            }
-
-
-     
-            sw.WriteLine(number);
-            sw.Flush();
-            sw.Close();
-
-
-            datapro(pos_x, pos_y, number, m_prm.gap, out path_x, out path_y, out path_number);
-
-            file = "path.txt";
-            sw = new StreamWriter(file);
-            for (int i = 0; i < path_number; i++)
-            {
-                sw.WriteLine(path_x[i]);
-                sw.WriteLine(path_y[i]);
-            }
-
-            sw.WriteLine(path_number);
-            sw.Flush();
-            sw.Close();
-
-            
-            
-            
-        }
-
-        private void pointDisper(double gap, double[] vision_x, double[] vision_y, int vision_num, 
-            out double[]points_x, out double[]points_y, out int points_num)
-        {
-            gap = 0;
-            points_x = vision_x;
-            points_y = vision_y;
-            points_num = vision_num;
-        }
-
-
-        private void enableForm()
-        {
-            if(InvokeRequired)
-            {
-                this.Invoke(new myWorkDelegate(enableForm));
-                return;
-            }
-
-            button_startWork.Enabled = true;
-            groupBox_posPrm.Enabled = true;
-            groupBox_otherPrm.Enabled = true;
-            button_SetSignalPrm.Enabled = true;
-            moWin.Enabled = true;
-
-        }
-
-        private void disableForm()
-        {
-            if (InvokeRequired)
-            {
-                this.Invoke(new myWorkDelegate(disableForm));
-                return;
-            }
-
-            button_startWork.Enabled = false ;
-            groupBox_posPrm.Enabled = false;
-            groupBox_otherPrm.Enabled = false;
-            button_SetSignalPrm.Enabled = false;
-            moWin.Enabled = false;
-        }
-
- 
-        private void button_stopWork_Click(object sender, EventArgs e)
-        {
-            stopFlag = true;
-            moWin.m_motion.Motion_Stop();
-            Thread.Sleep(200);
-            if(workStopped != null)
-                workStopped();
-        }
-
-        //记录、应用、移动
-        //记录：从运动模块读取坐标，并显示在屏幕，但是不会应用
-        //应用：将textBox中的数据应用到控制参数
-        //移动：移动到控制参数中的位置，注意不一定是TextBox中的数值
+        //起始位置系列函数
         private void button_StartPos_rc_Click(object sender, EventArgs e)
         {
             rc_recordPos(21);
         }
-
         private void button_StartPos_ap_Click(object sender, EventArgs e)
         {
             double temp1,temp2;
@@ -761,12 +864,11 @@ namespace RepairLaser
 
         }
 
-
+        //拍照（大靶面相机）位置系列函数
         private void button_PhotoPos_rc_Click(object sender, EventArgs e)
         {
             rc_recordPos(22);
         }
-
         private void button_PhotoPos_ap_Click(object sender, EventArgs e)
         {
             double temp1, temp2;
@@ -789,6 +891,7 @@ namespace RepairLaser
             goto_photoPos(1);
         }
 
+        //结束位置系列函数
         private void button_EndPos_rc_Click(object sender, EventArgs e)
         {
             rc_recordPos(23);
@@ -815,8 +918,42 @@ namespace RepairLaser
             goto_endPos(1);
         }
 
+        //自定义位置系列函数
+        private void cb_pos_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            int i = cb_pos.SelectedIndex;
+            double x = m_prm.pos_x[i];
+            double y = m_prm.pos_y[i];
+
+            tb_pos_x.Text = x.ToString();
+            tb_pos_y.Text = y.ToString();
+        }
+        private void btn_rc_Click(object sender, EventArgs e)
+        {
+            rc_recordPos(cb_pos.SelectedIndex);
 
 
+        }
+        private void btn_ap_Click(object sender, EventArgs e)
+        {
+            ap_recordPos(cb_pos.SelectedIndex);
+        }
+        private void btn_mv_Click(object sender, EventArgs e)
+        {
+            goto_recordPos(cb_pos.SelectedIndex, 1);
+        }
+
+
+        #endregion
+
+
+        #region 外部模块及参数设置系列函数（运动参数/标定/信号发生器/治具/gap/参数保存等）
+        private void btn_setMotionPrm_Click(object sender, EventArgs e)
+        {
+            moWin.m_motion.Motion_ExeSetParamApplication();
+        }
+
+        //设置gap参数
         private void button_gap_Click(object sender, EventArgs e)
         {
             double temp1;
@@ -844,76 +981,90 @@ namespace RepairLaser
         }
 
 
+        //打开信号发生器控制界面
         private void button_SetSignalPrm_Click(object sender, EventArgs e)
         {
             signalWin.Show();
         }
 
-
-
-        static void datapro(double[] pos_x, double[] pos_y, int pos_number,
-            double gap, out double[] path_x, out double[] path_y, out int path_number)
-        {
-            path_x = null;
-            path_y = null;
-            path_number = 0;
-            if (pos_x == null || pos_y == null || pos_number == 0)
-                return;
-            if (pos_x.Length != pos_number || pos_y.Length != pos_number)
-                return;
-            path_x = new double[pos_number];
-            path_y = new double[pos_number];
-
-            path_x[0] = pos_x[0];
-            path_y[0] = pos_y[0];
-
-            int k = 0;
-            double temp_x = path_x[k];
-            double temp_y = path_y[k];
-            k++;
-
-
-            for (int i = 1; i < pos_number; i++)
-            {
-                while (i < pos_number && distance(pos_x[i], pos_y[i], temp_x, temp_y) < gap)
-                {
-                    i++;
-                }
-
-                if (i < pos_number)
-                {
-
-                    temp_x = path_x[k] = pos_x[i];
-                    temp_y = path_y[k] = pos_y[i];
-                    k++;
-
-                }
-                else
-                {
-                    if (distance(pos_x[0], pos_y[0], temp_x, temp_y) >= gap)
-                    {
-                        temp_x = path_x[k] = pos_x[i-1];
-                        temp_y = path_y[k] = pos_y[i-1];
-                        k++;
-                    }
-                }
-            }
-
-            path_number = k;
-        }
-
-        static double distance(double x1, double y1, double x2, double y2)
-        {
-            double temp = (y2 - y1) * (y2 - y1) + (x2 - x1) * (x2 - x1);
-            temp = Math.Sqrt(temp);
-            return temp;
-        }
-
+        //打开标定界面
         private void btn_cali_Click(object sender, EventArgs e)
         {
             caWin.Show();
         }
 
+        private void btn_local_Click(object sender, EventArgs e)
+        {
+            if (flag_local)
+            {
+                moWin.m_motion.Motion_OutputBit(1, 1);
+                btn_local.Text = "定位";
+                flag_local = false;
+            }
+            else
+            {
+                moWin.m_motion.Motion_OutputBit(1, 0);
+                btn_local.Text = "取消定位";
+                flag_local = true;
+            }
+        }
+
+        private void btn_absorb_Click(object sender, EventArgs e)
+        {
+            if (flag_absorb)
+            {
+                moWin.m_motion.Motion_OutputBit(3, 1);
+                btn_absorb.Text = "吸附";
+                flag_absorb = false;
+            }
+            else
+            {
+                moWin.m_motion.Motion_OutputBit(3, 0);
+                btn_absorb.Text = "关闭吸附";
+                flag_absorb = true;
+            }
+        }
+
+        private void btn_pushdown_Click(object sender, EventArgs e)
+        {
+            if (flag_push)
+            {
+                moWin.m_motion.Motion_OutputBit(5, 1);
+                btn_pushdown.Text = "下压";
+                flag_push = false;
+            }
+            else
+            {
+                moWin.m_motion.Motion_OutputBit(5, 0);
+                btn_pushdown.Text = "取消下压";
+                flag_push = true;
+            }
+        }
+
+
+        private void lightUp_push()
+        {
+            moWin.m_motion.Motion_OutputBit(1, 0);
+            Thread.Sleep(500);
+            moWin.m_motion.Motion_OutputBit(3, 0);
+            Thread.Sleep(200);
+            moWin.m_motion.Motion_OutputBit(5, 0);
+            Thread.Sleep(500);
+        }
+
+        private void lightDown_release()
+        {
+            moWin.m_motion.Motion_OutputBit(5, 1);
+            Thread.Sleep(200);
+            moWin.m_motion.Motion_OutputBit(3, 1);
+            Thread.Sleep(200);
+            moWin.m_motion.Motion_OutputBit(1, 1);
+            Thread.Sleep(100);
+        }
+
+        #endregion
+
+        #region 焦点记录系列函数
         private void btn_focusRcd1_Click(object sender, EventArgs e)
         {
             double zPos;
@@ -964,11 +1115,10 @@ namespace RepairLaser
             moWin.Motion_PToPMove_unblock(movePrm);
         }
 
-        private void btn_setMotionPrm_Click(object sender, EventArgs e)
-        {
-            moWin.m_motion.Motion_ExeSetParamApplication();
-        }
+        #endregion
 
+
+        #region 测试用函数
         private void btn_testJob3_Click(object sender, EventArgs e)
         {
 
@@ -1036,122 +1186,14 @@ namespace RepairLaser
             sw.Close();
         }
 
-        private void btn_local_Click(object sender, EventArgs e)
-        {
-            if(flag_local)
-            {
-                moWin.m_motion.Motion_OutputBit(1, 1);
-                btn_local.Text = "定位";
-                flag_local = false;
-            }
-            else
-            {
-                moWin.m_motion.Motion_OutputBit(1, 0);
-                btn_local.Text = "取消定位";
-                flag_local = true;
-            }
-        }
-
-        private void btn_absorb_Click(object sender, EventArgs e)
-        {
-            if (flag_absorb)
-            {
-                moWin.m_motion.Motion_OutputBit(3, 1);
-                btn_absorb.Text = "吸附";
-                flag_absorb = false;
-            }
-            else
-            {
-                moWin.m_motion.Motion_OutputBit(3, 0);
-                btn_absorb.Text = "关闭吸附";
-                flag_absorb = true;
-            }
-        }
-
-        private void btn_pushdown_Click(object sender, EventArgs e)
-        {
-            if (flag_push)
-            {
-                moWin.m_motion.Motion_OutputBit(5, 1);
-                btn_pushdown.Text = "下压";
-                flag_push = false;
-            }
-            else
-            {
-                moWin.m_motion.Motion_OutputBit(5, 0);
-                btn_pushdown.Text = "取消下压";
-                flag_push = true;
-            }
-        }
-
-        private void btn_goBack_Click(object sender, EventArgs e)
-        {
-            signalWin.lightDown();
-            Thread.Sleep(100);
-            lightDown_release();
-
-        }
-
-        private void lightUp_push()
-        {
-            moWin.m_motion.Motion_OutputBit(1, 0);
-            Thread.Sleep(500);
-            moWin.m_motion.Motion_OutputBit(3, 0);
-            Thread.Sleep(200);
-            moWin.m_motion.Motion_OutputBit(5, 0);
-            Thread.Sleep(500);
-        }
-
-        private void lightDown_release()
-        {
-            moWin.m_motion.Motion_OutputBit(5, 1);
-            Thread.Sleep(200);
-            moWin.m_motion.Motion_OutputBit(3, 1);
-            Thread.Sleep(200);
-            moWin.m_motion.Motion_OutputBit(1, 1);
-            Thread.Sleep(100);
-        }
-
-        private void btn_test_Click(object sender, EventArgs e)
-        {
-            if (workStarted != null)
-                workStarted();
-            Thread workThd = new Thread(testWork);
-            workThd.IsBackground = true;
-            if (workStopped != null)
-                workThd.Start();
-        }
-
-        private void cb_pos_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            int i = cb_pos.SelectedIndex;
-            double x = m_prm.pos_x[i];
-            double y = m_prm.pos_y[i];
-
-            tb_pos_x.Text = x.ToString();
-            tb_pos_y.Text = y.ToString();
-        }
-
-        private void btn_rc_Click(object sender, EventArgs e)
-        {
-            rc_recordPos(cb_pos.SelectedIndex);
-
-            
-        }
-
-        private void btn_ap_Click(object sender, EventArgs e)
-        {
-            ap_recordPos(cb_pos.SelectedIndex);
-        }
-
-        private void btn_mv_Click(object sender, EventArgs e)
-        {
-            goto_recordPos(cb_pos.SelectedIndex,0);
-        }
-
-        
+        #endregion
 
 
-        
+
+
+
+
+
+
     }
 }
